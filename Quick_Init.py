@@ -61,6 +61,7 @@ def K_Means_(inputfile,n):
     for k in K:
         kmeans = KMeans(n_clusters=k)
         kmeans.fit(X)
+        draw_(inputfile, k)
         mean_distortions.append(
             sum(
                 np.min(
@@ -72,7 +73,6 @@ def K_Means_(inputfile,n):
     plt.ylabel(u'平均畸变程度', fontproperties=font)
     plt.title(u'用肘部法确定最佳的K值', fontproperties=font)
     plt.show()
-    draw_(inputfile,k)
     return True
 def Agglo(inputfile,n):
     from sklearn.cluster import AgglomerativeClustering
