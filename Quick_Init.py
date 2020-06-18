@@ -5,6 +5,23 @@ import numpy as np
 import math
 import random
 import matplotlib.pyplot as plt
+''''
+def TSNE_(data_zs):
+    from sklearn.manifold import TSNE
+    tsne = TSNE()
+    tsne.fit_transform(data_zs)  # 进行数据降维
+    tsne = pd.DataFrame(tsne.embedding_, index=data_zs.index)  # 转换数据格式
+    import matplotlib.pyplot as plt
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['axes.unicode_minus'] = False
+    d = tsne[data_zs[u'聚类类别'] == 0]
+    plt.plot(d[0], d[1], 'r.')
+    d = tsne[data_zs[u'聚类类别'] == 1]
+    plt.plot(d[0], d[1], 'go')
+    d = tsne[data_zs[u'聚类类别'] == 2]
+    plt.plot(d[0], d[1], 'b*')
+    plt.show()
+'''
 def draw_(inputfile,k):
     from sklearn.cluster import KMeans
     X=pd.read_csv(inputfile)
@@ -62,6 +79,11 @@ def K_Means_(inputfile,n):
         kmeans = KMeans(n_clusters=k)
         kmeans.fit(X)
         draw_(inputfile, k)
+        r1 = pd.Series(kmeans.labels_).value_counts()  # 统计各个类别的数目
+        r2 = pd.DataFrame(kmeans.cluster_centers_)  # 找出聚类中心
+        r = pd.concat([r2, r1], axis=1)  # 横向连接，0是纵向
+        r.columns = list(X.columns) + [u'聚类类别']  # 重命名表头
+        print(r)
         mean_distortions.append(
             sum(
                 np.min(

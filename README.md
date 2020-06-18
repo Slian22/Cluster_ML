@@ -102,6 +102,7 @@ def K_Means_(inputfile,n):
     return True
 #n为想聚到多少类
 #用肘部法确定最佳的K值
+#输出从1-n每个聚类的效果和图片
 ```
 
 ```powershell
