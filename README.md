@@ -19,7 +19,7 @@ def Replace_Data(inputfile):
 
 - [x] 已实现
 
-### 1.3数据相关性可视化*
+### 1.3 数据相关性可视化*
 
 ```python
 def Corr(inputfile):
@@ -169,7 +169,10 @@ Attributes
   The children of each non-leaf node. Values less than `n_samples` correspond to leaves of the tree which are the original samples. A node `i` greater than or equal to `n_samples` is a non-leaf node and has children `children_[i - n_samples]`. Alternatively at the i-th iteration, children[i][0] and children[i][1] are merged to form node `n_samples + i`
 
 ```python
-def
+def Agglo(inputfile,n):
+    return True
+#输入文件不带最后一列
+#输出聚类以后的图形
 ```
 
 
@@ -228,13 +231,29 @@ Returns
 
   Cluster labels for each point. Noisy samples are given the label -1.
 
+```python
+def DBS_(inputfile):
+    return True
+#传入文件需带最后一列
+#输出下列内容
+#Estimated number of clusters: 6
+#Estimated number of noise points: 12225
+#Homogeneity: 0.003
+#Completeness: 0.023
+#V-measure: 0.006
+#Adjusted Rand Index: -0.013
+#Adjusted Mutual Information: 0.005
+#Silhouette Coefficient: -0.325
+#聚类图形
+```
 
 
--[x] 已实现
+
+- [x] 已实现
 
 ## 3、聚类评估
 
-### 3.1 聚类->无真实值评估
+### 3.1 聚类->无监督评估
 
 ```python
 def Judge_1(inputfile,n):
@@ -243,7 +262,9 @@ def Judge_1(inputfile,n):
 #输出KMeans、AgglomerativeClustering、DBSCAN聚类效果
 ```
 
-### 3.2 聚类->有真实值评估
+- [x] 已实现
+
+### 3.2 聚类->有监督评估
 
 ```python
 def Judge_2(inputfile,n):
@@ -251,3 +272,53 @@ def Judge_2(inputfile,n):
 #同上
 ```
 
+- [x] 已实现
+
+# 项目实现
+
+```python
+#%%
+
+import pandas as pd
+import numpy as np
+data=pd.read_csv('data/online_shoppers_intention.csv')
+data.head()
+
+#%%
+
+from Quick_Init import *
+data=Replace_Data('data/online_shoppers_intention_1.csv')
+data.head()
+data.to_csv('data/trans_1.csv')
+
+#%%
+
+data.describe().round(2).T
+#数据描述
+
+#%%
+
+from Quick_Init import *
+K_Means_('data/trans_1.csv',10)
+
+#%%
+
+from Quick_Init import *
+Judge_1('data/trans_1.csv',2)
+
+#%%
+
+from Quick_Init import *
+Judge_2('data/trans_2.csv',5)
+
+#%%
+
+from Quick_Init import *
+DBS_('data/trans_2.csv')
+
+
+#%%
+
+from Quick_Init import *
+Agglo('data/trans_1.csv',5)
+```

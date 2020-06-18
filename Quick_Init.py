@@ -5,15 +5,6 @@ import numpy as np
 import math
 import random
 import matplotlib.pyplot as plt
-def draw_2(inputfile,n):
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from sklearn.cluster import AgglomerativeClustering
-    from scipy.cluster.hierarchy import dendrogram, linkage
-    data = np.random.randint(0, 10, size=[10, 2])
-    Z = linkage(data)
-
-    dendrogram(Z)
 def draw_(inputfile,k):
     from sklearn.cluster import KMeans
     X=pd.read_csv(inputfile)
@@ -95,32 +86,53 @@ def Agglo(inputfile,n):
     plt.savefig("01.jpg")
     plt.show()
     # %%
-    from sklearn.cluster import AgglomerativeClustering
-    cluster = AgglomerativeClustering(n_clusters=n, affinity='euclidean', linkage='ward')
-    cluster.fit_predict(data)
-    plt.figure(figsize=(10, 7))
-    plt.scatter(data[:, 0], data[:, 1], c=cluster.labels_, cmap='rainbow')
-    plt.savefig("02.jpg")
-    plt.show()
+    return True
 def DBS_(inputfile):
+    import numpy as np
     from sklearn.cluster import DBSCAN
     from sklearn import metrics
-    X=pd.read_csv(inputfile)
-    db = DBSCAN().fit(X)
+    from sklearn.preprocessing import StandardScaler
+    import matplotlib.pyplot as plt
+    # 初始化样本数据
+    data = pd.read_csv(inputfile)
+    labels_true = data['Revenue']
+    X = data.drop('Revenue', axis=1)
+    X = StandardScaler().fit_transform(X)
+    # 计算DBSCAN
+    db = DBSCAN(eps=0.3, min_samples=10).fit(X)
+    core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+    core_samples_mask[db.core_sample_indices_] = True
     labels = db.labels_
-    X['cluster_db'] = labels
-    X.sort_values('cluster_db')
-    # 查看根据DBSCAN聚类后的分组统计结果（均值）
-    print(X.groupby('cluster_db').mean())
-    # 我们可以从上面这个图里观察聚类效果的好坏，但是当数据量很大，或者指标很多的时候，观察起来就会非常麻烦。
-    # 就是下面这个函数可以计算轮廓系数
-    score = metrics.silhouette_score(X, X.cluster_db)
-    print(score)
-    markers = [['*', 'b'], ['o', 'r']]
-    for i in range(2):
-        members = db.labels_ == i  # members是布尔数组
-        plt.scatter(X[members, 0], X[members, 1], s=60, marker=markers[i][0], c=markers[i][1], alpha=0.5)
-    plt.title('DBSCANClustering')
+    # 聚类的结果
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    n_noise_ = list(labels).count(-1)
+    print('Estimated number of clusters: %d' % n_clusters_)
+    print('Estimated number of noise points: %d' % n_noise_)
+    print("Homogeneity: %0.3f" % metrics.homogeneity_score(labels_true, labels))
+    print("Completeness: %0.3f" % metrics.completeness_score(labels_true, labels))
+    print("V-measure: %0.3f" % metrics.v_measure_score(labels_true, labels))
+    print("Adjusted Rand Index: %0.3f"
+          % metrics.adjusted_rand_score(labels_true, labels))
+    print("Adjusted Mutual Information: %0.3f"
+          % metrics.adjusted_mutual_info_score(labels_true, labels,
+                                               average_method='arithmetic'))
+    print("Silhouette Coefficient: %0.3f"
+          % metrics.silhouette_score(X, labels))
+    # 绘出结果
+    unique_labels = set(labels)
+    colors = [plt.cm.Spectral(each)
+              for each in np.linspace(0, 1, len(unique_labels))]
+    for k, col in zip(unique_labels, colors):
+        if k == -1:
+            col = [0, 0, 0, 1]
+        class_member_mask = (labels == k)
+        xy = X[class_member_mask & core_samples_mask]
+        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
+                 markeredgecolor='k', markersize=14)
+        xy = X[class_member_mask & ~core_samples_mask]
+        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
+                 markeredgecolor='k', markersize=6)
+    plt.title('Estimated number of clusters: %d' % n_clusters_)
     plt.show()
     return True
 def Judge_1(inputfile,n):
