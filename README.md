@@ -15,6 +15,7 @@ def Replace_Data(inputfile):
     return Data
 #将数据里面的Month类型和VisitorType类型还有Weekend类型进行数值转化；
 #返回处理完的数据DataFrame类型
+#根据业务和相关性删除相关的列，需要手动操作
 ```
 
 - [x] 已实现
@@ -102,7 +103,7 @@ def K_Means_(inputfile,n):
     return True
 #n为想聚到多少类
 #用肘部法确定最佳的K值
-#输出从1-n每个聚类的效果和图片
+#输出从1-n每个聚类的效果和轮廓系数图
 ```
 
 ```powershell
@@ -176,7 +177,11 @@ def Agglo(inputfile,n):
 #输出聚类以后的图形
 ```
 
-
+```python
+def draw_(inputfile,k):
+    return True
+#输出用K-means聚成k类的效果
+```
 
 ### 2.3 DBSCAN聚类
 
@@ -284,42 +289,45 @@ import pandas as pd
 import numpy as np
 data=pd.read_csv('data/online_shoppers_intention.csv')
 data.head()
-
 #%%
 
 from Quick_Init import *
 data=Replace_Data('data/online_shoppers_intention_1.csv')
 data.head()
 data.to_csv('data/trans_1.csv')
-
+print(data.describe().round(2).T)
 #%%
-
-data.describe().round(2).T
+from Quick_Init import *
 #数据描述
+Corr('data/trans_2.csv')
+#根据业务删去相应的列，保留文件到Pre_data.csv
+#%%
+from Quick_Init import *
+K_Means_('data/Pre_data_x.csv',9)
+#%%
+
+from Quick_Init import *
+Judge_1('data/Pre_data_x.csv',5)
 
 #%%
 
 from Quick_Init import *
-K_Means_('data/trans_1.csv',10)
+Judge_2('data/Pre_data_y.csv',5)
 
 #%%
 
 from Quick_Init import *
-Judge_1('data/trans_1.csv',2)
-
-#%%
-
-from Quick_Init import *
-Judge_2('data/trans_2.csv',5)
-
-#%%
-
-from Quick_Init import *
-DBS_('data/trans_2.csv')
+DBS_('data/Pre_data_y.csv')
 
 
 #%%
 
 from Quick_Init import *
-Agglo('data/trans_1.csv',5)
+Agglo('data/Pre_data_x.csv',5)
+
+#%%
+from Quick_Init import *
+draw_('data/Pre_data_x.csv',5)
+
+
 ```

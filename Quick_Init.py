@@ -1,9 +1,5 @@
-#!/usr/bin/env python 
-# -*- coding:utf-8 -*-
 import pandas as pd
 import numpy as np
-import math
-import random
 import matplotlib.pyplot as plt
 ''''
 def TSNE_(data_zs):
@@ -22,22 +18,40 @@ def TSNE_(data_zs):
     plt.plot(d[0], d[1], 'b*')
     plt.show()
 '''
+def draw_silhouette_score(inputfile,n):
+    from sklearn.metrics import silhouette_score
+    from sklearn.cluster import KMeans
+    X = pd.read_csv(inputfile)
+    from sklearn.preprocessing import StandardScaler
+    X = StandardScaler().fit_transform(X)
+    Scores = []  # 存放轮廓系数
+    for k in range(2,n):
+        estimator = KMeans(n_clusters=k)  # 构造聚类器
+        estimator.fit(X)
+        Scores.append(silhouette_score(X, estimator.labels_, metric='euclidean'))
+    xxx = range(2,n)
+    plt.xlabel('k')
+    plt.ylabel('Silhouette Coefficient')
+    plt.plot(xxx, Scores, 'o-')
+    plt.show()
+    return True
 def draw_(inputfile,k):
     from sklearn.cluster import KMeans
     X=pd.read_csv(inputfile)
+    from sklearn.preprocessing import StandardScaler
+    X = StandardScaler().fit_transform(X)
     kmeans = KMeans(n_clusters=k)
     X1 = np.array(X)
     kmeans.fit(X1)
     print(kmeans.labels_)  # 类别
     print(kmeans.cluster_centers_)  # 聚类中心
-    markers = [['*', 'b'], ['o', 'r']]
-    for i in range(2):
+    markers = [['*', 'b'], ['o', 'r'],['.','c'],[',','g'],['^','y'],['<','m'],['>','g'],['s','b'],['h','r'],['+','c'],['d','r']]
+    for i in range(k):
         members = kmeans.labels_ == i  # members是布尔数组
         plt.scatter(X1[members, 0], X1[members, 1], s=60, marker=markers[i][0], c=markers[i][1], alpha=0.5)
     plt.title('KmeansClustering')
     plt.show()
 def Corr(inputfile):
-    import matplotlib.pyplot as plt
     import seaborn as sns
     data=pd.read_csv(inputfile)
     print("相关性：")
@@ -70,42 +84,43 @@ def Replace_Data(inputfile):
     return data
 def K_Means_(inputfile,n):
     from sklearn.cluster import KMeans
-    from scipy.spatial.distance import cdist
     from matplotlib.font_manager import FontProperties
     K = range(1, n)
     X=pd.read_csv(inputfile)
+    from sklearn.preprocessing import StandardScaler
+    X = StandardScaler().fit_transform(X)
     mean_distortions = []
     for k in K:
         kmeans = KMeans(n_clusters=k)
         kmeans.fit(X)
-        draw_(inputfile, k)
         r1 = pd.Series(kmeans.labels_).value_counts()  # 统计各个类别的数目
         r2 = pd.DataFrame(kmeans.cluster_centers_)  # 找出聚类中心
         r = pd.concat([r2, r1], axis=1)  # 横向连接，0是纵向
-        r.columns = list(X.columns) + [u'聚类类别']  # 重命名表头
         print(r)
-        mean_distortions.append(
-            sum(
-                np.min(
-                    cdist(X, kmeans.cluster_centers_, metric='euclidean'), axis=1))
-            / X.shape[0])
+        mean_distortions.append(kmeans.inertia_)
     plt.plot(K, mean_distortions, 'bx-')
     plt.xlabel('k')
     font = FontProperties(size=20)
     plt.ylabel(u'平均畸变程度', fontproperties=font)
     plt.title(u'用肘部法确定最佳的K值', fontproperties=font)
     plt.show()
+    draw_silhouette_score(inputfile,n)
     return True
 def Agglo(inputfile,n):
+    import scipy.cluster.hierarchy as sch
     from sklearn.cluster import AgglomerativeClustering
-    import scipy.cluster.hierarchy as shc
+    from sklearn.preprocessing import MinMaxScaler
+    # 读取数据
     data = pd.read_csv(inputfile)
-    cluster = AgglomerativeClustering(n_clusters=n, affinity='euclidean', linkage='ward')
-    cluster.fit_predict(data)
-    plt.figure(figsize=(10, 7))
-    plt.title("Customer Dendograms")
-    dend = shc.dendrogram(shc.linkage(data, method='ward'))
-    plt.savefig("01.jpg")
+    df = MinMaxScaler().fit_transform(data)
+    # 建立模型
+    model = AgglomerativeClustering(n_clusters=n)
+    model.fit(df)
+    data['类别标签'] = model.labels_
+    print(data.head())
+    # 画图
+    ss = sch.linkage(df, method='ward')
+    sch.dendrogram(ss)
     plt.show()
     # %%
     return True
